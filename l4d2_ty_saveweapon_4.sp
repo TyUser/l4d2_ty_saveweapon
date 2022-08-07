@@ -12,6 +12,8 @@
 #include <sdktools>
 #pragma newdecls required
 
+#define HX_SKIN 1
+
 char sg_buffer0[64];
 char sg_buffer1[40];
 char sg_buffer2[32];
@@ -23,6 +25,12 @@ char sg_slot2[MAXPLAYERS+1][40];
 char sg_slot3[MAXPLAYERS+1][40];
 char sg_slot4[MAXPLAYERS+1][40];
 char sg_defib[MAXPLAYERS+1][40];
+
+#if HX_SKIN
+char sg_skin[MAXPLAYERS+1][48];
+int ig_skin[MAXPLAYERS+1]; /* m_survivorCharacter */
+ConVar hg_skin;
+#endif
 
 int ig_prop0[MAXPLAYERS+1]; /* m_iClip1 slot 0 */
 int ig_prop1[MAXPLAYERS+1]; /* m_iClip1 slot 1 */
@@ -42,7 +50,7 @@ public Plugin myinfo =
 	name = "[L4D2] Save Weapon",
 	author = "MAKS",
 	description = "L4D2 coop save weapon",
-	version = "4.15",
+	version = "4.16b",
 	url = "forums.alliedmods.net/showthread.php?p=2304407"
 };
 
@@ -55,6 +63,9 @@ public void OnPluginStart()
 
 	hg_health = CreateConVar("l4d2_hx_health", "1", "", FCVAR_NONE, true, 0.0, true, 1.0);
 	hg_noob = CreateConVar("l4d2_hx_noob", "1", "", FCVAR_NONE, true, 0.0, true, 1.0);
+#if HX_SKIN
+	hg_skin = CreateConVar("l4d2_hx_skin", "1", "", FCVAR_NONE, true, 0.0, true, 1.0);
+#endif
 }
 
 int HxGameMode()
@@ -81,6 +92,10 @@ void HxCleaning(int &client)
 	ig_prop4[client] = 0;
 	ig_prop5[client] = 0;
 
+#if HX_SKIN
+	ig_skin[client] = 0;
+	sg_skin[client][0] = '\0';
+#endif
 	sg_slot0[client][0] = '\0';
 	sg_slot1[client][0] = '\0';
 	sg_slot2[client][0] = '\0';
@@ -134,7 +149,7 @@ int HxGetSlot1(int &client, int iSlot1)
 
 	if (StrContains(sg_buffer0, "v_pistolA.mdl", true) != -1)
 	{
-		sg_slot1[client] = "pistol";
+		sg_slot1[client] = "weapon_pistol";
 		return 1;
 	}
 	if (StrContains(sg_buffer0, "v_dual_pistolA.mdl", true) != -1)
@@ -144,78 +159,78 @@ int HxGetSlot1(int &client, int iSlot1)
 	}
 	if (StrContains(sg_buffer0, "v_desert_eagle.mdl", true) != -1)
 	{
-		sg_slot1[client] = "pistol_magnum";
+		sg_slot1[client] = "weapon_pistol_magnum";
 		return 1;
 	}
 	if (StrContains(sg_buffer0, "v_bat.mdl", true) != -1)
 	{
-		sg_slot1[client] = "baseball_bat";
+		sg_slot1[client] = "weapon_baseball_bat";
 		return 1;
 	}
 	if (StrContains(sg_buffer0, "v_cricket_bat.mdl", true) != -1)
 	{
-		sg_slot1[client] = "cricket_bat";
+		sg_slot1[client] = "weapon_cricket_bat";
 		return 1;
 	}
 	if (StrContains(sg_buffer0, "v_crowbar.mdl", true) != -1)
 	{
-		sg_slot1[client] = "crowbar";
+		sg_slot1[client] = "weapon_crowbar";
 		return 1;
 	}
 	if (StrContains(sg_buffer0, "v_fireaxe.mdl", true) != -1)
 	{
-		sg_slot1[client] = "fireaxe";
+		sg_slot1[client] = "weapon_fireaxe";
 		return 1;
 	}
 	if (StrContains(sg_buffer0, "v_katana.mdl", true) != -1)
 	{
-		sg_slot1[client] = "katana";
+		sg_slot1[client] = "weapon_katana";
 		return 1;
 	}
 	if (StrContains(sg_buffer0, "v_golfclub.mdl", true) != -1)
 	{
-		sg_slot1[client] = "golfclub";
+		sg_slot1[client] = "weapon_golfclub";
 		return 1;
 	}
 	if (StrContains(sg_buffer0, "v_machete.mdl", true) != -1)
 	{
-		sg_slot1[client] = "machete";
+		sg_slot1[client] = "weapon_machete";
 		return 1;
 	}
 	if (StrContains(sg_buffer0, "v_tonfa.mdl", true) != -1)
 	{
-		sg_slot1[client] = "tonfa";
+		sg_slot1[client] = "weapon_tonfa";
 		return 1;
 	}
 	if (StrContains(sg_buffer0, "v_electric_guitar.mdl", true) != -1)
 	{
-		sg_slot1[client] = "electric_guitar";
+		sg_slot1[client] = "weapon_electric_guitar";
 		return 1;
 	}
 	if (StrContains(sg_buffer0, "v_frying_pan.mdl", true) != -1)
 	{
-		sg_slot1[client] = "frying_pan";
+		sg_slot1[client] = "weapon_frying_pan";
 		return 1;
 	}
 	if (StrContains(sg_buffer0, "v_chainsaw.mdl", true) != -1)
 	{
 		ig_prop1[client] = GetEntProp(iSlot1, Prop_Send, "m_iClip1", 4);
-		sg_slot1[client] = "chainsaw";
+		sg_slot1[client] = "weapon_chainsaw";
 		return 1;
 	}
 	if (StrContains(sg_buffer0, "v_knife_t.mdl", true) != -1)
 	{
-		sg_slot1[client] = "knife";
+		sg_slot1[client] = "weapon_knife";
 		return 1;
 	}
 	if (StrContains(sg_buffer0, "v_pitchfork.mdl", true) != -1)
 	{
-		sg_slot1[client] = "pitchfork";
+		sg_slot1[client] = "weapon_pitchfork";
 		return 1;
 	}
 	if (StrContains(sg_buffer0, "v_shovel.mdl", true) != -1)
 	{
-		sg_slot1[client] = "shovel";
+		sg_slot1[client] = "weapon_shovel";
 		return 1;
 	}
 
@@ -247,6 +262,10 @@ void HxSaveC(int &client)
 				SetEntPropFloat(client, Prop_Send, "m_healthBuffer", 0.0);
 			}
 
+#if HX_SKIN
+			GetClientModel(client, sg_skin[client], 47);
+			ig_skin[client] = GetEntProp(client, Prop_Send, "m_survivorCharacter");
+#endif
 			iSlot0 = GetPlayerWeaponSlot(client, 0);
 			iSlot1 = GetPlayerWeaponSlot(client, 1);
 			iSlot2 = GetPlayerWeaponSlot(client, 2);
@@ -316,6 +335,19 @@ void HxGiveC(int &client)
 		HxRemoveWeapon(client, iSlot3);
 		HxRemoveWeapon(client, iSlot4);
 
+#if HX_SKIN
+		if (GetConVarBool(hg_skin))
+		{
+			if (!IsFakeClient(client))
+			{
+				if (sg_skin[client][0] != '\0')
+				{
+					SetEntityModel(client, sg_skin[client]);
+					SetEntProp(client, Prop_Send, "m_survivorCharacter", ig_skin[client]);
+				}
+			}
+		}
+#endif
 		if (sg_slot0[client][0] != '\0')
 		{
 			HxFakeCHEAT(client, "give", sg_slot0[client]);
@@ -329,7 +361,7 @@ void HxGiveC(int &client)
 		{
 			if (GetConVarBool(hg_noob))
 			{
-				HxFakeCHEAT(client, "give", "smg_silenced");
+				HxFakeCHEAT(client, "give", "weapon_smg_silenced");
 				SetEntProp(GetPlayerWeaponSlot(client, 0), Prop_Send, "m_iClip1", 50, 4);
 			}
 		}
@@ -338,13 +370,13 @@ void HxGiveC(int &client)
 		{
 			if (!strcmp(sg_slot1[client], "dual_pistol", true))
 			{
-				HxFakeCHEAT(client, "give", "pistol");
-				HxFakeCHEAT(client, "give", "pistol");
+				HxFakeCHEAT(client, "give", "weapon_pistol");
+				HxFakeCHEAT(client, "give", "weapon_pistol");
 			}
 			else
 			{
 				HxFakeCHEAT(client, "give", sg_slot1[client]);
-				if (!strcmp(sg_slot1[client], "chainsaw", true))
+				if (!strcmp(sg_slot1[client], "weapon_chainsaw", true))
 				{
 					iSlot1 = GetPlayerWeaponSlot(client, 1);
 					SetEntProp(iSlot1, Prop_Send, "m_iClip1", ig_prop1[client], 4);
@@ -359,7 +391,7 @@ void HxGiveC(int &client)
 		}
 		else
 		{
-			HxFakeCHEAT(client, "give", "pistol");
+			HxFakeCHEAT(client, "give", "weapon_pistol");
 		}
 
 		if (sg_slot2[client][0] != '\0')
