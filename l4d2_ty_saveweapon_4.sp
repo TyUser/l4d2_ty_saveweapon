@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *
- * Copyright 2011 - 2021 steamcommunity.com/profiles/76561198025355822/
+ * Copyright 2011 - 2022 steamcommunity.com/profiles/76561198025355822/
  * Fixed 2015 steamcommunity.com/id/Electr0n
  * Fixed 2016 steamcommunity.com/id/mixjayrus
  * Fixed 2016 user Merudo
@@ -149,7 +149,7 @@ int HxGetSlot1(int &client, int iSlot1)
 
 	if (StrContains(sg_buffer0, "v_pistolA.mdl", true) != -1)
 	{
-		sg_slot1[client] = "weapon_pistol";
+		sg_slot1[client] = "pistol";
 		return 1;
 	}
 	if (StrContains(sg_buffer0, "v_dual_pistolA.mdl", true) != -1)
@@ -159,78 +159,78 @@ int HxGetSlot1(int &client, int iSlot1)
 	}
 	if (StrContains(sg_buffer0, "v_desert_eagle.mdl", true) != -1)
 	{
-		sg_slot1[client] = "weapon_pistol_magnum";
+		sg_slot1[client] = "pistol_magnum";
 		return 1;
 	}
 	if (StrContains(sg_buffer0, "v_bat.mdl", true) != -1)
 	{
-		sg_slot1[client] = "weapon_baseball_bat";
+		sg_slot1[client] = "baseball_bat";
 		return 1;
 	}
 	if (StrContains(sg_buffer0, "v_cricket_bat.mdl", true) != -1)
 	{
-		sg_slot1[client] = "weapon_cricket_bat";
+		sg_slot1[client] = "cricket_bat";
 		return 1;
 	}
 	if (StrContains(sg_buffer0, "v_crowbar.mdl", true) != -1)
 	{
-		sg_slot1[client] = "weapon_crowbar";
+		sg_slot1[client] = "crowbar";
 		return 1;
 	}
 	if (StrContains(sg_buffer0, "v_fireaxe.mdl", true) != -1)
 	{
-		sg_slot1[client] = "weapon_fireaxe";
+		sg_slot1[client] = "fireaxe";
 		return 1;
 	}
 	if (StrContains(sg_buffer0, "v_katana.mdl", true) != -1)
 	{
-		sg_slot1[client] = "weapon_katana";
+		sg_slot1[client] = "katana";
 		return 1;
 	}
 	if (StrContains(sg_buffer0, "v_golfclub.mdl", true) != -1)
 	{
-		sg_slot1[client] = "weapon_golfclub";
+		sg_slot1[client] = "golfclub";
 		return 1;
 	}
 	if (StrContains(sg_buffer0, "v_machete.mdl", true) != -1)
 	{
-		sg_slot1[client] = "weapon_machete";
+		sg_slot1[client] = "machete";
 		return 1;
 	}
 	if (StrContains(sg_buffer0, "v_tonfa.mdl", true) != -1)
 	{
-		sg_slot1[client] = "weapon_tonfa";
+		sg_slot1[client] = "tonfa";
 		return 1;
 	}
 	if (StrContains(sg_buffer0, "v_electric_guitar.mdl", true) != -1)
 	{
-		sg_slot1[client] = "weapon_electric_guitar";
+		sg_slot1[client] = "electric_guitar";
 		return 1;
 	}
 	if (StrContains(sg_buffer0, "v_frying_pan.mdl", true) != -1)
 	{
-		sg_slot1[client] = "weapon_frying_pan";
+		sg_slot1[client] = "frying_pan";
 		return 1;
 	}
 	if (StrContains(sg_buffer0, "v_chainsaw.mdl", true) != -1)
 	{
 		ig_prop1[client] = GetEntProp(iSlot1, Prop_Send, "m_iClip1", 4);
-		sg_slot1[client] = "weapon_chainsaw";
+		sg_slot1[client] = "chainsaw";
 		return 1;
 	}
 	if (StrContains(sg_buffer0, "v_knife_t.mdl", true) != -1)
 	{
-		sg_slot1[client] = "weapon_knife";
+		sg_slot1[client] = "knife";
 		return 1;
 	}
 	if (StrContains(sg_buffer0, "v_pitchfork.mdl", true) != -1)
 	{
-		sg_slot1[client] = "weapon_pitchfork";
+		sg_slot1[client] = "pitchfork";
 		return 1;
 	}
 	if (StrContains(sg_buffer0, "v_shovel.mdl", true) != -1)
 	{
-		sg_slot1[client] = "weapon_shovel";
+		sg_slot1[client] = "shovel";
 		return 1;
 	}
 
@@ -370,13 +370,13 @@ void HxGiveC(int &client)
 		{
 			if (!strcmp(sg_slot1[client], "dual_pistol", true))
 			{
-				HxFakeCHEAT(client, "give", "weapon_pistol");
-				HxFakeCHEAT(client, "give", "weapon_pistol");
+				HxFakeCHEAT(client, "give", "pistol");
+				HxFakeCHEAT(client, "give", "pistol");
 			}
 			else
 			{
 				HxFakeCHEAT(client, "give", sg_slot1[client]);
-				if (!strcmp(sg_slot1[client], "weapon_chainsaw", true))
+				if (!strcmp(sg_slot1[client], "chainsaw", true))
 				{
 					iSlot1 = GetPlayerWeaponSlot(client, 1);
 					SetEntProp(iSlot1, Prop_Send, "m_iClip1", ig_prop1[client], 4);
@@ -391,7 +391,7 @@ void HxGiveC(int &client)
 		}
 		else
 		{
-			HxFakeCHEAT(client, "give", "weapon_pistol");
+			HxFakeCHEAT(client, "give", "pistol");
 		}
 
 		if (sg_slot2[client][0] != '\0')
