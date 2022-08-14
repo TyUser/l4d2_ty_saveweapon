@@ -567,7 +567,7 @@ public void Event_MapTransition(Event event, const char[] name, bool dontBroadca
 
 public void OnMapStart()
 {
-	/* survivors */
+/* survivors */
 	if (!IsModelPrecached("models/survivors/survivor_teenangst.mdl"))
 	{
 		PrecacheModel("models/survivors/survivor_teenangst.mdl", false);
