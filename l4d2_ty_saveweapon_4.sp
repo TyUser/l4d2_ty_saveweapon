@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *
- * Copyright 2011 - 2022 steamcommunity.com/profiles/76561198025355822/
+ * Copyright 2011 - 2024 steamcommunity.com/profiles/76561198025355822/
  * Fixed 2015 steamcommunity.com/id/Electr0n
  * Fixed 2016 steamcommunity.com/id/mixjayrus
  * Fixed 2016 user Merudo
+ * Fixed 2024 github.com/fbef0102
  *
 */
 #pragma semicolon 1
@@ -12,12 +13,12 @@
 #include <sdktools>
 #pragma newdecls required
 
-#define HX_SKIN 1
-
 char sg_buffer0[64];
-char sg_buffer1[40];
-char sg_buffer2[32];
-char sg_buffer3[24];
+char sg_buffer1[64];
+char sg_buffer2[64];
+char sg_buffer3[64];
+
+char sg_skin[MAXPLAYERS+1][64];
 
 char sg_slot0[MAXPLAYERS+1][40];
 char sg_slot1[MAXPLAYERS+1][40];
@@ -26,31 +27,31 @@ char sg_slot3[MAXPLAYERS+1][40];
 char sg_slot4[MAXPLAYERS+1][40];
 char sg_defib[MAXPLAYERS+1][40];
 
-#if HX_SKIN
-char sg_skin[MAXPLAYERS+1][48];
-int ig_skin[MAXPLAYERS+1]; /* m_survivorCharacter */
-ConVar hg_skin;
-#endif
-
 int ig_prop0[MAXPLAYERS+1]; /* m_iClip1 slot 0 */
 int ig_prop1[MAXPLAYERS+1]; /* m_iClip1 slot 1 */
 int ig_prop2[MAXPLAYERS+1]; /* m_upgradeBitVec slot 0 */
 int ig_prop3[MAXPLAYERS+1]; /* m_nUpgradedPrimaryAmmoLoaded slot 0 */
 int ig_prop4[MAXPLAYERS+1]; /* m_nSkin slot 0 */
 int ig_prop5[MAXPLAYERS+1]; /* m_nSkin slot 1 */
+int ig_prop6[MAXPLAYERS+1]; /* m_iAmmo slot 0 */
+
+int ig_skin[MAXPLAYERS+1]; /* m_survivorCharacter */
 
 int ig_coop;
 int ig_protection;
+int ig_iAmmoOffset;
+int ig_iPrimaryAmmoType;
 
 ConVar hg_health;
 ConVar hg_noob;
+ConVar hg_skin;
 
 public Plugin myinfo =
 {
 	name = "[L4D2] Save Weapon",
 	author = "MAKS",
 	description = "L4D2 coop save weapon",
-	version = "4.16b",
+	version = "4.18b",
 	url = "forums.alliedmods.net/showthread.php?p=2304407"
 };
 
@@ -60,12 +61,14 @@ public void OnPluginStart()
 	HookEvent("item_pickup", Event_ItemPickup);
 	HookEvent("defibrillator_used", Event_DefibUsed);
 	HookEvent("map_transition", Event_MapTransition, EventHookMode_PostNoCopy);
+	HookEvent("finale_win", Event_finale_win, EventHookMode_PostNoCopy);
 
-	hg_health = CreateConVar("l4d2_hx_health", "1", "", FCVAR_NONE, true, 0.0, true, 1.0);
-	hg_noob = CreateConVar("l4d2_hx_noob", "1", "", FCVAR_NONE, true, 0.0, true, 1.0);
-#if HX_SKIN
-	hg_skin = CreateConVar("l4d2_hx_skin", "1", "", FCVAR_NONE, true, 0.0, true, 1.0);
-#endif
+	hg_health = CreateConVar("l4d2_hx_health", "1", "If 1, restore 100 full health when end of chapter.", FCVAR_NONE, true, 0.0, true, 1.0);
+	hg_noob = CreateConVar("l4d2_hx_noob", "1", "Start with a smg silenced.", FCVAR_NONE, true, 0.0, true, 1.0);
+	hg_skin = CreateConVar("l4d2_hx_skin", "1", "If 1, save character model and restore.", FCVAR_NONE, true, 0.0, true, 1.0);
+
+	ig_iAmmoOffset = FindSendPropInfo("CTerrorPlayer", "m_iAmmo");
+	ig_iPrimaryAmmoType = FindSendPropInfo("CBaseCombatWeapon", "m_iPrimaryAmmoType");
 }
 
 int HxGameMode()
@@ -91,11 +94,11 @@ void HxCleaning(int &client)
 	ig_prop3[client] = 0;
 	ig_prop4[client] = 0;
 	ig_prop5[client] = 0;
+	ig_prop6[client] = 0;
 
-#if HX_SKIN
 	ig_skin[client] = 0;
 	sg_skin[client][0] = '\0';
-#endif
+
 	sg_slot0[client][0] = '\0';
 	sg_slot1[client][0] = '\0';
 	sg_slot2[client][0] = '\0';
@@ -140,6 +143,17 @@ void HxKickC(int &client)
 	}
 
 	KickClient(client, "Mt");
+}
+
+int HxGetWeaponOffset(int iSlot0) 
+{
+	int iOffset = GetEntData(iSlot0, ig_iPrimaryAmmoType);
+	if (iOffset > 0)
+	{
+		return iOffset * 4;
+	}
+
+	return 0;
 }
 
 int HxGetSlot1(int &client, int iSlot1)
@@ -246,6 +260,7 @@ void HxSaveC(int &client)
 	int iSlot2;
 	int iSlot3;
 	int iSlot4;
+	int iOffset;
 
 	if (GetClientTeam(client) == 2)
 	{
@@ -262,10 +277,9 @@ void HxSaveC(int &client)
 				SetEntPropFloat(client, Prop_Send, "m_healthBuffer", 0.0);
 			}
 
-#if HX_SKIN
 			GetClientModel(client, sg_skin[client], 47);
 			ig_skin[client] = GetEntProp(client, Prop_Send, "m_survivorCharacter");
-#endif
+
 			iSlot0 = GetPlayerWeaponSlot(client, 0);
 			iSlot1 = GetPlayerWeaponSlot(client, 1);
 			iSlot2 = GetPlayerWeaponSlot(client, 2);
@@ -279,6 +293,13 @@ void HxSaveC(int &client)
 				ig_prop2[client] = GetEntProp(iSlot0, Prop_Send, "m_upgradeBitVec", 4);
 				ig_prop3[client] = GetEntProp(iSlot0, Prop_Send, "m_nUpgradedPrimaryAmmoLoaded", 4);
 				ig_prop4[client] = GetEntProp(iSlot0, Prop_Send, "m_nSkin", 4);
+
+				iOffset = HxGetWeaponOffset(iSlot0);
+				if (iOffset > 0)
+				{
+					ig_prop6[client] = GetEntData(client, ig_iAmmoOffset + iOffset);
+				}
+
 				HxRemoveWeapon(client, iSlot0);
 			}
 			if (iSlot1 > 0)
@@ -320,6 +341,7 @@ void HxGiveC(int &client)
 	int iSlot2;
 	int iSlot3;
 	int iSlot4;
+	int iOffset;
 
 	if (IsPlayerAlive(client))
 	{
@@ -335,7 +357,6 @@ void HxGiveC(int &client)
 		HxRemoveWeapon(client, iSlot3);
 		HxRemoveWeapon(client, iSlot4);
 
-#if HX_SKIN
 		if (GetConVarBool(hg_skin))
 		{
 			if (!IsFakeClient(client))
@@ -347,7 +368,7 @@ void HxGiveC(int &client)
 				}
 			}
 		}
-#endif
+
 		if (sg_slot0[client][0] != '\0')
 		{
 			HxFakeCHEAT(client, "give", sg_slot0[client]);
@@ -356,6 +377,12 @@ void HxGiveC(int &client)
 			SetEntProp(iSlot0, Prop_Send, "m_upgradeBitVec", ig_prop2[client], 4);
 			SetEntProp(iSlot0, Prop_Send, "m_nUpgradedPrimaryAmmoLoaded", ig_prop3[client], 4);
 			SetEntProp(iSlot0, Prop_Send, "m_nSkin", ig_prop4[client], 4);
+
+			iOffset = HxGetWeaponOffset(iSlot0);
+			if (iOffset > 0)
+			{
+				SetEntData(client, ig_iAmmoOffset + iOffset, ig_prop6[client]);
+			}
 		}
 		else
 		{
@@ -562,6 +589,16 @@ public void Event_MapTransition(Event event, const char[] name, bool dontBroadca
 			}
 			i += 1;
 		}
+	}
+}
+
+public void Event_finale_win(Event event, const char[] name, bool dontBroadcast)
+{
+	int i = 1;
+	while (i <= MaxClients)
+	{
+		HxCleaning(i);
+		i += 1;
 	}
 }
 
