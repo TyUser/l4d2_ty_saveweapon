@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *
- * Copyright 2011 - 2024 steamcommunity.com/profiles/76561198025355822/
+ * Copyright 2011 - 2025 steamcommunity.com/profiles/76561198025355822/
  * Fixed 2015 steamcommunity.com/id/Electr0n
  * Fixed 2016 steamcommunity.com/id/mixjayrus
  * Fixed 2016 user Merudo
@@ -51,7 +51,7 @@ public Plugin myinfo =
 	name = "[L4D2] Save Weapon",
 	author = "MAKS",
 	description = "L4D2 coop save weapon",
-	version = "4.18b",
+	version = "4.18c",
 	url = "forums.alliedmods.net/showthread.php?p=2304407"
 };
 
@@ -248,8 +248,16 @@ int HxGetSlot1(int &client, int iSlot1)
 		return 1;
 	}
 
-	GetEdictClassname(iSlot1, sg_slot1[client], 39);
-	LogError("m_ModelName(%s) %s", sg_buffer0, sg_slot1[client]);
+	char sBuf[40];
+	GetEdictClassname(iSlot1, sBuf, sizeof(sBuf)-1);
+
+	if (!strcmp(sBuf, "weapon_melee", true))
+	{
+		GetEntPropString(iSlot1, Prop_Data, "m_strMapSetScriptName", sBuf, sizeof(sBuf)-1);
+		sg_slot1[client] = sBuf;
+	}
+
+	LogError("Debugging: m_ModelName(%s) %s %s", sg_buffer0, sg_slot1[client], sBuf);
 	return 0;
 }
 
