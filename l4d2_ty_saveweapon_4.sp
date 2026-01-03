@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *
- * Copyright 2011 - 2025 steamcommunity.com/profiles/76561198025355822/
+ * Copyright 2011 - 2026 steamcommunity.com/profiles/76561198025355822/
  * Fixed 2015 steamcommunity.com/id/Electr0n
  * Fixed 2016 steamcommunity.com/id/mixjayrus
  * Fixed 2016 user Merudo
@@ -13,19 +13,22 @@
 #include <sdktools>
 #pragma newdecls required
 
-char sg_buffer0[64];
-char sg_buffer1[64];
-char sg_buffer2[64];
-char sg_buffer3[64];
+#define HX_DEBUG 0
 
-char sg_skin[MAXPLAYERS+1][64];
+#define HX_BUFFER_SIZE 64
+char sg_buffer0[HX_BUFFER_SIZE];
+char sg_buffer1[HX_BUFFER_SIZE];
+char sg_buffer2[HX_BUFFER_SIZE];
+char sg_buffer3[HX_BUFFER_SIZE];
 
-char sg_slot0[MAXPLAYERS+1][40];
-char sg_slot1[MAXPLAYERS+1][40];
-char sg_slot2[MAXPLAYERS+1][40];
-char sg_slot3[MAXPLAYERS+1][40];
-char sg_slot4[MAXPLAYERS+1][40];
-char sg_defib[MAXPLAYERS+1][40];
+char sg_skin[MAXPLAYERS+1][HX_BUFFER_SIZE];
+
+char sg_slot0[MAXPLAYERS+1][HX_BUFFER_SIZE];
+char sg_slot1[MAXPLAYERS+1][HX_BUFFER_SIZE];
+char sg_slot2[MAXPLAYERS+1][HX_BUFFER_SIZE];
+char sg_slot3[MAXPLAYERS+1][HX_BUFFER_SIZE];
+char sg_slot4[MAXPLAYERS+1][HX_BUFFER_SIZE];
+char sg_defib[MAXPLAYERS+1][HX_BUFFER_SIZE];
 
 int ig_prop0[MAXPLAYERS+1]; /* m_iClip1 slot 0 */
 int ig_prop1[MAXPLAYERS+1]; /* m_iClip1 slot 1 */
@@ -51,7 +54,7 @@ public Plugin myinfo =
 	name = "[L4D2] Save Weapon",
 	author = "MAKS",
 	description = "L4D2 coop save weapon",
-	version = "4.18c",
+	version = "4.19",
 	url = "forums.alliedmods.net/showthread.php?p=2304407"
 };
 
@@ -69,6 +72,10 @@ public void OnPluginStart()
 
 	ig_iAmmoOffset = FindSendPropInfo("CTerrorPlayer", "m_iAmmo");
 	ig_iPrimaryAmmoType = FindSendPropInfo("CBaseCombatWeapon", "m_iPrimaryAmmoType");
+
+#if HX_DEBUG
+	LogMessage("OnPluginStart()");
+#endif
 }
 
 int HxGameMode()
@@ -106,15 +113,25 @@ void HxCleaning(int &client)
 	sg_slot4[client][0] = '\0';
 
 	sg_defib[client][0] = '\0';
+
+#if HX_DEBUG
+	LogMessage("HxCleaning %d", client);
+#endif
 }
 
 void HxRemoveWeapon(int &client, int &entity)
 {
+#if HX_DEBUG
+	LogMessage("HxRemoveWeapon %d, %d", client, entity);
+#endif
 	if (entity > 0)
 	{
-		if (RemovePlayerItem(client, entity))
+		if (IsValidEntity(entity))
 		{
-			AcceptEntityInput(entity, "Kill");
+			if (RemovePlayerItem(client, entity))
+			{
+				AcceptEntityInput(entity, "Kill");
+			}
 		}
 	}
 }
@@ -160,6 +177,10 @@ int HxGetSlot1(int &client, int iSlot1)
 {
 	sg_buffer0[0] = '\0';
 	GetEntPropString(iSlot1, Prop_Data, "m_ModelName", sg_buffer0, sizeof(sg_buffer0)-1);
+
+#if HX_DEBUG
+	LogMessage("HxGetSlot1 %N %d %s", client, client, sg_buffer0);
+#endif
 
 	if (StrContains(sg_buffer0, "v_pistolA.mdl", true) != -1)
 	{
@@ -248,7 +269,7 @@ int HxGetSlot1(int &client, int iSlot1)
 		return 1;
 	}
 
-	char sBuf[40];
+	char sBuf[HX_BUFFER_SIZE];
 	GetEdictClassname(iSlot1, sBuf, sizeof(sBuf)-1);
 
 	if (!strcmp(sBuf, "weapon_melee", true))
@@ -257,7 +278,9 @@ int HxGetSlot1(int &client, int iSlot1)
 		sg_slot1[client] = sBuf;
 	}
 
-	LogError("Debugging: m_ModelName(%s) %s %s", sg_buffer0, sg_slot1[client], sBuf);
+#if HX_DEBUG
+	LogMessage("[DEBUG] m_ModelName %s %s %s", sg_buffer0, sg_slot1[client], sBuf);
+#endif
 	return 0;
 }
 
@@ -285,7 +308,7 @@ void HxSaveC(int &client)
 				SetEntPropFloat(client, Prop_Send, "m_healthBuffer", 0.0);
 			}
 
-			GetClientModel(client, sg_skin[client], 47);
+			GetClientModel(client, sg_skin[client], HX_BUFFER_SIZE-1);
 			ig_skin[client] = GetEntProp(client, Prop_Send, "m_survivorCharacter");
 
 			iSlot0 = GetPlayerWeaponSlot(client, 0);
@@ -296,7 +319,7 @@ void HxSaveC(int &client)
 
 			if (iSlot0 > 0)
 			{
-				GetEdictClassname(iSlot0, sg_slot0[client], 39);
+				GetEdictClassname(iSlot0, sg_slot0[client], HX_BUFFER_SIZE-1);
 				ig_prop0[client] = GetEntProp(iSlot0, Prop_Send, "m_iClip1", 4);
 				ig_prop2[client] = GetEntProp(iSlot0, Prop_Send, "m_upgradeBitVec", 4);
 				ig_prop3[client] = GetEntProp(iSlot0, Prop_Send, "m_nUpgradedPrimaryAmmoLoaded", 4);
@@ -317,19 +340,39 @@ void HxSaveC(int &client)
 			}
 			if (iSlot2 > 0)
 			{
-				GetEdictClassname(iSlot2, sg_slot2[client], 39);
+				GetEdictClassname(iSlot2, sg_slot2[client], HX_BUFFER_SIZE-1);
 				HxRemoveWeapon(client, iSlot2);
 			}
 			if (iSlot3 > 0)
 			{
-				GetEdictClassname(iSlot3, sg_slot3[client], 39);
+				GetEdictClassname(iSlot3, sg_slot3[client], HX_BUFFER_SIZE-1);
 				HxRemoveWeapon(client, iSlot3);
 			}
 			if (iSlot4 > 0)
 			{
-				GetEdictClassname(iSlot4, sg_slot4[client], 39);
+				GetEdictClassname(iSlot4, sg_slot4[client], HX_BUFFER_SIZE-1);
 				HxRemoveWeapon(client, iSlot4);
 			}
+
+		#if HX_DEBUG
+			LogMessage("HxSaveC %N %d", client, client);
+			LogMessage("Skin %s", sg_skin[client]);
+			LogMessage("m_survivorCharacter				= %d", ig_skin[client]);
+			LogMessage("Slot0 %s", sg_slot0[client]);
+			LogMessage("m_iClip1						= %d", ig_prop0[client]);
+			LogMessage("m_upgradeBitVec					= %d", ig_prop2[client]);
+			LogMessage("m_nUpgradedPrimaryAmmoLoaded	= %d", ig_prop3[client]);
+			LogMessage("m_nSkin							= %d", ig_prop4[client]);
+			LogMessage("m_iAmmo							= %d", ig_prop6[client]);
+			LogMessage("iOffset							= %d", iOffset);
+
+			LogMessage("Slot1 %s", sg_slot1[client]);
+			LogMessage("m_nSkin							= %d", ig_prop5[client]);
+
+			LogMessage("Slot2 %s", sg_slot2[client]);
+			LogMessage("Slot3 %s", sg_slot3[client]);
+			LogMessage("Slot4 %s", sg_slot4[client]);
+		#endif
 		}
 	}
 }
@@ -365,7 +408,10 @@ void HxGiveC(int &client)
 		HxRemoveWeapon(client, iSlot3);
 		HxRemoveWeapon(client, iSlot4);
 
-		if (GetConVarBool(hg_skin))
+	#if HX_DEBUG
+		LogMessage("HxGiveC %N %d", client, client);
+	#endif
+		if (hg_skin.BoolValue)
 		{
 			if (!IsFakeClient(client))
 			{
@@ -394,7 +440,7 @@ void HxGiveC(int &client)
 		}
 		else
 		{
-			if (GetConVarBool(hg_noob))
+			if (hg_noob.BoolValue)
 			{
 				HxFakeCHEAT(client, "give", "weapon_smg_silenced");
 				SetEntProp(GetPlayerWeaponSlot(client, 0), Prop_Send, "m_iClip1", 50, 4);
@@ -471,6 +517,9 @@ public void OnClientPostAdminCheck(int client)
 	{
 		if (ig_coop)
 		{
+		#if HX_DEBUG
+			LogMessage("OnClientPostAdminCheck %N %d", client, client);
+		#endif
 			CreateTimer(5.5, HxTimerConnected, client, TIMER_FLAG_NO_MAPCHANGE);
 		}
 	}
@@ -482,6 +531,9 @@ public void OnClientDisconnect(int client)
 	{
 		if (!ig_protection)
 		{
+		#if HX_DEBUG
+			LogMessage("OnClientDisconnect %N %d", client, client);
+		#endif
 			HxCleaning(client);
 		}
 	}
@@ -509,6 +561,9 @@ public void Event_RoundStart(Event event, const char[] name, bool dontBroadcast)
 {
 	if (ig_coop)
 	{
+	#if HX_DEBUG
+		LogMessage("HookEvent %s", name);
+	#endif
 		CreateTimer(1.2, HxTimerRS, _, TIMER_FLAG_NO_MAPCHANGE);
 	}
 }
@@ -520,6 +575,7 @@ public void Event_ItemPickup(Event event, const char[] name, bool dontBroadcast)
 	{
 		if (!IsFakeClient(iUserid))
 		{
+			sg_buffer1[0] = '\0';
 			event.GetString("item", sg_buffer1, sizeof(sg_buffer1)-1);
 			if (!strcmp(sg_buffer1, "pistol_magnum", true))
 			{
@@ -534,7 +590,7 @@ public void Event_ItemPickup(Event event, const char[] name, bool dontBroadcast)
 				int iSlot1 = GetPlayerWeaponSlot(iUserid, 1);
 				if (iSlot1 > 0)
 				{
-					GetEntPropString(iSlot1, Prop_Data, "m_strMapSetScriptName", sg_defib[iUserid], 39);
+					GetEntPropString(iSlot1, Prop_Data, "m_strMapSetScriptName", sg_defib[iUserid], HX_BUFFER_SIZE-1);
 				}
 			}
 		}
@@ -554,6 +610,7 @@ public Action HxTimerDefib(Handle timer, any client)
 					int iSlot1 = GetPlayerWeaponSlot(client, 1);
 					HxRemoveWeapon(client, iSlot1);
 					HxFakeCHEAT(client, "give", sg_defib[client]);
+					sg_defib[client][0] = '\0';
 				}
 			}
 		}
@@ -569,6 +626,9 @@ public void Event_DefibUsed(Event event, const char[] name, bool dontBroadcast)
 	{
 		if (ig_coop)
 		{
+		#if HX_DEBUG
+			LogMessage("HookEvent %s", name);
+		#endif
 			CreateTimer(1.0, HxTimerDefib, iSubject, TIMER_FLAG_NO_MAPCHANGE);
 		}
 	}
@@ -581,6 +641,9 @@ public void Event_MapTransition(Event event, const char[] name, bool dontBroadca
 
 	if (ig_coop)
 	{
+	#if HX_DEBUG
+		LogMessage("HookEvent %s", name);
+	#endif
 		while (i <= MaxClients)
 		{
 			HxCleaning(i);
@@ -603,6 +666,9 @@ public void Event_MapTransition(Event event, const char[] name, bool dontBroadca
 public void Event_finale_win(Event event, const char[] name, bool dontBroadcast)
 {
 	int i = 1;
+#if HX_DEBUG
+	LogMessage("HookEvent %s", name);
+#endif
 	while (i <= MaxClients)
 	{
 		HxCleaning(i);
@@ -612,6 +678,9 @@ public void Event_finale_win(Event event, const char[] name, bool dontBroadcast)
 
 public void OnMapStart()
 {
+#if HX_DEBUG
+	LogMessage("OnMapStart(start)");
+#endif
 /* survivors */
 	if (!IsModelPrecached("models/survivors/survivor_teenangst.mdl"))
 	{
@@ -762,6 +831,8 @@ public void OnMapStart()
 	}
 
 	ig_protection = 0;
+
+	sg_buffer2[0] = '\0';
 	GetCurrentMap(sg_buffer2, sizeof(sg_buffer2)-1);
 	if (StrContains(sg_buffer2, "m1_", true) > 1)
 	{
@@ -772,4 +843,7 @@ public void OnMapStart()
 			i += 1;
 		}
 	}
+#if HX_DEBUG
+	LogMessage("OnMapStart(end)");
+#endif
 }
