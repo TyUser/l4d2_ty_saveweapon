@@ -13,7 +13,7 @@
 #include <sdktools>
 #pragma newdecls required
 
-#define HX_DEBUG 0
+#define HX_DEBUG 1
 
 #define HX_BUFFER_SIZE 64
 char sg_buffer0[HX_BUFFER_SIZE];
@@ -54,7 +54,7 @@ public Plugin myinfo =
 	name = "[L4D2] Save Weapon",
 	author = "MAKS",
 	description = "L4D2 coop save weapon",
-	version = "4.19",
+	version = "4.19a",
 	url = "forums.alliedmods.net/showthread.php?p=2304407"
 };
 
@@ -66,9 +66,9 @@ public void OnPluginStart()
 	HookEvent("map_transition", Event_MapTransition, EventHookMode_PostNoCopy);
 	HookEvent("finale_win", Event_finale_win, EventHookMode_PostNoCopy);
 
-	hg_health = CreateConVar("l4d2_hx_health", "1", "If 1, restore 100 full health when end of chapter.", FCVAR_NONE, true, 0.0, true, 1.0);
-	hg_noob = CreateConVar("l4d2_hx_noob", "1", "Start with a smg silenced.", FCVAR_NONE, true, 0.0, true, 1.0);
-	hg_skin = CreateConVar("l4d2_hx_skin", "1", "If 1, save character model and restore.", FCVAR_NONE, true, 0.0, true, 1.0);
+	hg_health = CreateConVar("l4d2_hx_health", "1", "If set to 1, restores full (100) health at the end of a chapter.", FCVAR_NONE, true, 0.0, true, 1.0);
+	hg_noob = CreateConVar("l4d2_hx_noob", "1", "Start with a silenced SMG.", FCVAR_NONE, true, 0.0, true, 1.0);
+	hg_skin = CreateConVar("l4d2_hx_skin", "1", "If set to 1, saves and restores the character model.", FCVAR_NONE, true, 0.0, true, 1.0);
 
 	ig_iAmmoOffset = FindSendPropInfo("CTerrorPlayer", "m_iAmmo");
 	ig_iPrimaryAmmoType = FindSendPropInfo("CBaseCombatWeapon", "m_iPrimaryAmmoType");
@@ -93,7 +93,7 @@ int HxGameMode()
 	return 0;
 }
 
-void HxCleaning(int &client)
+void HxCleaning(int client)
 {
 	ig_prop0[client] = 50;
 	ig_prop1[client] = 30;
@@ -119,7 +119,7 @@ void HxCleaning(int &client)
 #endif
 }
 
-void HxRemoveWeapon(int &client, int &entity)
+void HxRemoveWeapon(int client, int entity)
 {
 #if HX_DEBUG
 	LogMessage("HxRemoveWeapon %d, %d", client, entity);
@@ -136,7 +136,7 @@ void HxRemoveWeapon(int &client, int &entity)
 	}
 }
 
-void HxKickC(int &client)
+void HxKickC(int client)
 {
 	int iSlot0;
 	int iSlot2;
@@ -173,7 +173,7 @@ int HxGetWeaponOffset(int iSlot0)
 	return 0;
 }
 
-int HxGetSlot1(int &client, int iSlot1)
+int HxGetSlot1(int client, int iSlot1)
 {
 	sg_buffer0[0] = '\0';
 	GetEntPropString(iSlot1, Prop_Data, "m_ModelName", sg_buffer0, sizeof(sg_buffer0)-1);
@@ -274,8 +274,7 @@ int HxGetSlot1(int &client, int iSlot1)
 
 	if (!strcmp(sBuf, "weapon_melee", true))
 	{
-		GetEntPropString(iSlot1, Prop_Data, "m_strMapSetScriptName", sBuf, sizeof(sBuf)-1);
-		sg_slot1[client] = sBuf;
+		GetEntPropString(iSlot1, Prop_Data, "m_strMapSetScriptName", sg_slot1[client], HX_BUFFER_SIZE-1);
 	}
 
 #if HX_DEBUG
@@ -284,7 +283,7 @@ int HxGetSlot1(int &client, int iSlot1)
 	return 0;
 }
 
-void HxSaveC(int &client)
+void HxSaveC(int client)
 {
 	int iSlot0;
 	int iSlot1;
@@ -377,7 +376,7 @@ void HxSaveC(int &client)
 	}
 }
 
-void HxFakeCHEAT(int &client, const char[] sCmd, const char[] sArg)
+void HxFakeCHEAT(int client, const char[] sCmd, const char[] sArg)
 {
 	int iFlags = GetCommandFlags(sCmd);
 	SetCommandFlags(sCmd, iFlags & ~FCVAR_CHEAT);
@@ -385,7 +384,7 @@ void HxFakeCHEAT(int &client, const char[] sCmd, const char[] sArg)
 	SetCommandFlags(sCmd, iFlags);
 }
 
-void HxGiveC(int &client)
+void HxGiveC(int client)
 {
 	int iSlot0;
 	int iSlot1;
