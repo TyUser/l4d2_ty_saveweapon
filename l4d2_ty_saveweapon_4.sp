@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-/*
+/**
  *
  * Copyright 2011 - 2026 steamcommunity.com/profiles/76561198025355822/
  * Fixed 2015 steamcommunity.com/id/Electr0n
@@ -13,7 +13,11 @@
 #include <sdktools>
 #pragma newdecls required
 
-#define HX_DEBUG 1
+/**
+ * 1 - Debug mode is enabled.
+ * 0 - Debug mode is disabled.
+ */
+#define HX_DEBUG 0
 
 #define HX_BUFFER_SIZE 64
 char sg_buffer0[HX_BUFFER_SIZE];
@@ -121,11 +125,11 @@ void HxCleaning(int client)
 
 void HxRemoveWeapon(int client, int entity)
 {
-#if HX_DEBUG
-	LogMessage("HxRemoveWeapon %d, %d", client, entity);
-#endif
 	if (entity > 0)
 	{
+#if HX_DEBUG
+		LogMessage("HxRemoveWeapon %d, %d", client, entity);
+#endif
 		if (IsValidEntity(entity))
 		{
 			if (RemovePlayerItem(client, entity))
@@ -355,22 +359,20 @@ void HxSaveC(int client)
 
 		#if HX_DEBUG
 			LogMessage("HxSaveC %N %d", client, client);
-			LogMessage("Skin %s", sg_skin[client]);
-			LogMessage("m_survivorCharacter				= %d", ig_skin[client]);
-			LogMessage("Slot0 %s", sg_slot0[client]);
-			LogMessage("m_iClip1						= %d", ig_prop0[client]);
-			LogMessage("m_upgradeBitVec					= %d", ig_prop2[client]);
-			LogMessage("m_nUpgradedPrimaryAmmoLoaded	= %d", ig_prop3[client]);
-			LogMessage("m_nSkin							= %d", ig_prop4[client]);
-			LogMessage("m_iAmmo							= %d", ig_prop6[client]);
-			LogMessage("iOffset							= %d", iOffset);
-
-			LogMessage("Slot1 %s", sg_slot1[client]);
-			LogMessage("m_nSkin							= %d", ig_prop5[client]);
-
-			LogMessage("Slot2 %s", sg_slot2[client]);
-			LogMessage("Slot3 %s", sg_slot3[client]);
-			LogMessage("Slot4 %s", sg_slot4[client]);
+			LogMessage("Skin						 = %s", sg_skin[client]);
+			LogMessage("m_survivorCharacter			 = %d", ig_skin[client]);
+			LogMessage("Slot0						 = %s", sg_slot0[client]);
+			LogMessage("m_iClip1					 = %d", ig_prop0[client]);
+			LogMessage("m_upgradeBitVec				 = %d", ig_prop2[client]);
+			LogMessage("m_nUpgradedPrimaryAmmoLoaded = %d", ig_prop3[client]);
+			LogMessage("m_nSkin slot 0				 = %d", ig_prop4[client]);
+			LogMessage("m_iAmmo						 = %d", ig_prop6[client]);
+			LogMessage("iOffset						 = %d", iOffset);
+			LogMessage("Slot1						 = %s", sg_slot1[client]);
+			LogMessage("m_nSkin slot 1				 = %d", ig_prop5[client]);
+			LogMessage("Slot2						 = %s", sg_slot2[client]);
+			LogMessage("Slot3						 = %s", sg_slot3[client]);
+			LogMessage("Slot4						 = %s", sg_slot4[client]);
 		#endif
 		}
 	}
