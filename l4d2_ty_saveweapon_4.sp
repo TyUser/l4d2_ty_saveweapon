@@ -19,7 +19,7 @@
  */
 #define HX_DEBUG 0
 
-#define HX_BUFFER_SIZE 64
+#define HX_BUFFER_SIZE 128
 char sg_buffer0[HX_BUFFER_SIZE];
 char sg_buffer1[HX_BUFFER_SIZE];
 char sg_buffer2[HX_BUFFER_SIZE];
@@ -58,7 +58,7 @@ public Plugin myinfo =
 	name = "[L4D2] Save Weapon",
 	author = "MAKS",
 	description = "L4D2 coop save weapon",
-	version = "4.19a",
+	version = "4.20",
 	url = "forums.alliedmods.net/showthread.php?p=2304407"
 };
 
@@ -491,8 +491,9 @@ void HxGiveC(int client)
 	}
 }
 
-public Action HxTimerConnected(Handle timer, any client)
+public Action HxTimerConnected(Handle timer, any userid)
 {
+	int client = GetClientOfUserId(userid);
 	if (client > 0)
 	{
 		if (IsClientInGame(client))
@@ -521,7 +522,7 @@ public void OnClientPostAdminCheck(int client)
 		#if HX_DEBUG
 			LogMessage("OnClientPostAdminCheck %N %d", client, client);
 		#endif
-			CreateTimer(5.5, HxTimerConnected, client, TIMER_FLAG_NO_MAPCHANGE);
+			CreateTimer(5.5, HxTimerConnected, GetClientUserId(client), TIMER_FLAG_NO_MAPCHANGE);
 		}
 	}
 }
