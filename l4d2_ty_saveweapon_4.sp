@@ -279,11 +279,9 @@ int HxGetSlot1(int client, int iSlot1)
 	if (!strcmp(sBuf, "weapon_melee", true))
 	{
 		GetEntPropString(iSlot1, Prop_Data, "m_strMapSetScriptName", sg_slot1[client], HX_BUFFER_SIZE-1);
+		LogError("m_ModelName(%s) %s", sg_buffer0, sg_slot1[client]);
 	}
 
-#if HX_DEBUG
-	LogMessage("[DEBUG] m_ModelName %s %s %s", sg_buffer0, sg_slot1[client], sBuf);
-#endif
 	return 0;
 }
 
@@ -359,20 +357,20 @@ void HxSaveC(int client)
 
 		#if HX_DEBUG
 			LogMessage("HxSaveC %N %d", client, client);
-			LogMessage("Skin						 = %s", sg_skin[client]);
-			LogMessage("m_survivorCharacter			 = %d", ig_skin[client]);
-			LogMessage("Slot0						 = %s", sg_slot0[client]);
-			LogMessage("m_iClip1					 = %d", ig_prop0[client]);
-			LogMessage("m_upgradeBitVec				 = %d", ig_prop2[client]);
+			LogMessage("Skin                         = %s", sg_skin[client]);
+			LogMessage("m_survivorCharacter          = %d", ig_skin[client]);
+			LogMessage("Slot0                        = %s", sg_slot0[client]);
+			LogMessage("m_iClip1                     = %d", ig_prop0[client]);
+			LogMessage("m_upgradeBitVec              = %d", ig_prop2[client]);
 			LogMessage("m_nUpgradedPrimaryAmmoLoaded = %d", ig_prop3[client]);
-			LogMessage("m_nSkin slot 0				 = %d", ig_prop4[client]);
-			LogMessage("m_iAmmo						 = %d", ig_prop6[client]);
-			LogMessage("iOffset						 = %d", iOffset);
-			LogMessage("Slot1						 = %s", sg_slot1[client]);
-			LogMessage("m_nSkin slot 1				 = %d", ig_prop5[client]);
-			LogMessage("Slot2						 = %s", sg_slot2[client]);
-			LogMessage("Slot3						 = %s", sg_slot3[client]);
-			LogMessage("Slot4						 = %s", sg_slot4[client]);
+			LogMessage("m_nSkin slot 0               = %d", ig_prop4[client]);
+			LogMessage("m_iAmmo                      = %d", ig_prop6[client]);
+			LogMessage("iOffset                      = %d", iOffset);
+			LogMessage("Slot1                        = %s", sg_slot1[client]);
+			LogMessage("m_nSkin slot 1               = %d", ig_prop5[client]);
+			LogMessage("Slot2                        = %s", sg_slot2[client]);
+			LogMessage("Slot3                        = %s", sg_slot3[client]);
+			LogMessage("Slot4                        = %s", sg_slot4[client]);
 		#endif
 		}
 	}
