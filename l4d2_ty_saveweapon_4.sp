@@ -16,7 +16,7 @@
 /**
  * 1 - Debug mode is enabled.
  * 0 - Debug mode is disabled.
- */
+*/
 #define HX_DEBUG 0
 
 #define HX_BUFFER_SIZE 128
@@ -58,7 +58,7 @@ public Plugin myinfo =
 	name = "[L4D2] Save Weapon",
 	author = "MAKS",
 	description = "L4D2 coop save weapon",
-	version = "4.20",
+	version = "4.20b",
 	url = "forums.alliedmods.net/showthread.php?p=2304407"
 };
 
@@ -300,7 +300,7 @@ void HxSaveC(int client)
 		{
 			SetEntProp(client, Prop_Send, "m_isIncapacitated", 0);
 
-			if (GetConVarBool(hg_health))
+			if (hg_health.BoolValue)
 			{
 				SetEntProp(client, Prop_Send, "m_iHealth", 100);
 				SetEntProp(client, Prop_Send, "m_isGoingToDie", 0);
