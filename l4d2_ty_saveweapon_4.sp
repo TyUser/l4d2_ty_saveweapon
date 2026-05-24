@@ -18,14 +18,14 @@
  * 1 - enabled.
  * 0 - disabled.
  */
-#define HX_DEBUG       0
+#define HX_DEBUG 0
 
 /**
  * Gamemode mutation:
  * 1 - enabled.
  * 0 - disabled.
  */
-#define HX_MUTATION    0
+#define HX_MUTATION 0
 
 #define HX_BUFFER_SIZE 128
 char sg_buffer0[HX_BUFFER_SIZE];
@@ -66,7 +66,7 @@ public Plugin myinfo =
     name        = "[L4D2] Save Weapon",
     author      = "MAKS",
     description = "L4D2 coop save weapon",
-    version     = "4.22",
+    version     = "4.23",
     url         = "forums.alliedmods.net/showthread.php?p=2304407"
 };
 
@@ -78,9 +78,9 @@ public void OnPluginStart()
     HookEvent("map_transition", Event_MapTransition, EventHookMode_PostNoCopy);
     HookEvent("finale_win", Event_finale_win, EventHookMode_PostNoCopy);
 
-    hg_health = CreateConVar("l4d2_hx_health", "1", "If set to 1, restores full (100) health at the end of a chapter.", FCVAR_NONE, true, 0.0, true, 1.0);
-    hg_noob = CreateConVar("l4d2_hx_noob", "1", "Start with a silenced SMG.", FCVAR_NONE, true, 0.0, true, 1.0);
-    hg_skin = CreateConVar("l4d2_hx_skin", "1", "If set to 1, saves and restores the character model.", FCVAR_NONE, true, 0.0, true, 1.0);
+    hg_health = CreateConVar("l4d2_hx_health", "1", "If set to 1, restores full health (100 HP) at the end of the chapter.", FCVAR_NONE, true, 0.0, true, 1.0);
+    hg_noob = CreateConVar("l4d2_hx_noob", "1", "If set to 1, players start with a silenced SMG.", FCVAR_NONE, true, 0.0, true, 1.0);
+    hg_skin = CreateConVar("l4d2_hx_skin", "1", "If set to 1, saves and restores character models.", FCVAR_NONE, true, 0.0, true, 1.0);
 
     ig_iAmmoOffset = FindSendPropInfo("CTerrorPlayer", "m_iAmmo");
     ig_iPrimaryAmmoType = FindSendPropInfo("CBaseCombatWeapon", "m_iPrimaryAmmoType");
@@ -821,7 +821,7 @@ public void Event_finale_win(Event event, const char[] name, bool dontBroadcast)
 public void OnMapStart()
 {
 #if HX_DEBUG
-    LogMessage("OnMapStart(start)");
+    LogMessage("OnMapStart() Map started");
 #endif
 
     /* survivors */
@@ -1024,6 +1024,6 @@ public void OnMapStart()
     }
 
 #if HX_DEBUG
-    LogMessage("OnMapStart(end)");
+    LogMessage("OnMapStart() Finished");
 #endif
 }
